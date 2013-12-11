@@ -211,6 +211,7 @@ pmrpc = self.pmrpc =  function() {
     } else {
       var message = decode(serviceCallEvent.data);
 
+      // HINT: message.method is the `publicProcedureName` of a registered procedure
       if (typeof message.method !== "undefined") {
         // this is a request
 
@@ -418,11 +419,11 @@ pmrpc = self.pmrpc =  function() {
   }
 
   // Use the postMessage API to send a pmrpc message to a destination
-  function sendPmrpcMessage(destination, message, acl) {
+  function sendPmrpcMessage(destination, message, destinationDomain) {
     if (typeof destination === "undefined" || destination === null) {
       self.postMessage(encode(message));
     } else if (typeof destination.frames !== "undefined") {
-      return destination.postMessage(encode(message), acl);
+      return destination.postMessage(encode(message), destinationDomain);
     } else {
       destination.postMessage(encode(message));
     }
@@ -449,7 +450,7 @@ pmrpc = self.pmrpc =  function() {
       callQueue[callId] = callObj;
       for (var i=0; i<callObj.destinationDomain.length; i++) {
         sendPmrpcMessage(
-          callObj.destination, callObj.message, callObj.destinationDomain[i], callObj);
+          callObj.destination, callObj.message, callObj.destinationDomain[i]);
         self.setTimeout(function() { waitAndSendRequest(callId); }, callObj.timeout);
       }
     } else {
